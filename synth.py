@@ -8,7 +8,6 @@ from functools import reduce
 import math
 import time
 import threading
-import logging
 
 p = pyaudio.PyAudio()
 
@@ -80,7 +79,7 @@ class Wave(NamedTuple):
 
 
 stream = p.open(format=pyaudio.paFloat32,
-                channels=1,
+                channels=3,
                 rate=44100,
                 output=True)
 

@@ -20,17 +20,23 @@ phase = 0
 
 
 def sample(curr_time: float, frequency: int):
-    timepoints = np.linspace(0, duration, int(sample_rate * duration))
+    timepoints = np.linspace(0, duration, math.ceil(sample_rate * duration), endpoint=False)
     timepoints += curr_time
     samples = amplitude * np.sin(np.pi * 2 * timepoints * frequency + (phase * np.pi * 2))
     x = samples.astype(np.float32)
     return x
 
 
+def average_samples(samples):
+    total = reduce(lambda a, b: a + b, samples)
+    return np.array(total / len(samples)).astype(np.float32)
+
+
+
 class Test:
 
     def __init__(self, f):
-        self.frequency = f
+        self.frequencies = set(f)
         self.on = False
         self.volume = 0.5
 
@@ -43,51 +49,50 @@ class Test:
         i = 0
         while True:
             if self.on:
-                x = sample(i, self.frequency)
-                stream.write((x * self.volume).tobytes())
+                to_merge = []
+                for f in frozenset(self.frequencies):
+                    to_merge.append(sample(i, f))
+                if len(to_merge) > 0:
+                    x = average_samples(to_merge)
+                    stream.write((x * self.volume).tobytes())
+                else:
+                    time.sleep(duration)
             # else:
                 # time.sleep(duration)
             i += duration
 
-    def decay(self, decay_time: float=0.5, sample_rate=44100):
-        x = sample(0, self.frequency)
-        sample_duration = len(x) / sample_rate
+    def decay(self, decay_time: float=0.5):
         for i in np.linspace(1, 0, math.ceil(decay_time / duration)):
             v = 0.5 * (i - 1) ** 2
             self.volume = 0.5 - min(v, 1)
-            print(self.volume)
+            # print(self.volume)
+            time.sleep(duration)
+
+    def attack(self, attack_time: float=0.5):
+        for i in np.linspace(0, 0.5, math.ceil(attack_time / duration)):
+            self.volume = i
             time.sleep(duration)
 
 
-
-notesdata = json.loads(open('notes.json', 'r').read())
+# notesdata = json.loads(open('notes.json', 'r').read())
 
 # def repeat(sample: np.array, n: int):
     # return np.concatenate([sample for _ in range(n)])
 
-tone = Test(440)
+tone = Test([440, 660, 880])
 t = threading.Thread(target=tone.audio_loop)
 t.start()
+
+tone.on = True
+
+tone.attack()
+time.sleep(1)
+tone.decay()
 
 # tone2 = Test(660)
 # t2 = threading.Thread(target=tone2.audio_loop)
 # t2.start()
 
-print('started tone loop(s)')
-
-tone.on = True
-
-# for note in notesdata:
-#     tone.frequency = notesdata[note]['frequency']
-#     time.sleep(duration)
-
-for i in range(400, 600):
-    time.sleep(duration)
-    tone.decay(1)
-    tone.frequency = i
-    tone.volume = 0.5
-# time.sleep(1)
-# tone.decay()
 
 # time.sleep(2)
 
@@ -111,4 +116,4 @@ for i in range(400, 600):
 
 # stream.close()
 
-p.terminate()
+# p.terminate()
