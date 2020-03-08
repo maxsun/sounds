@@ -131,22 +131,15 @@ b = Osc(
 output_io = pyaudio.PyAudio()
 
 S = Synth(output_io)
-# a.amp = 
 S.oscillators.add(a)
 time.sleep(1)
 S.oscillators.add(b)
-# S.attacks[a] = [(0, np.linspace(0, 0, 44100 * 1)), (1, np.linspace(0, 1, 44100 * 1))]
-# S.attacks[b] = [(0, np.linspace(0, 1, 44100 * 1)), (1, np.linspace(1, 0, 44100 * 1))]
-# S.attacks[a] = 
 
 time.sleep(1)
 # S.attacks[b] = (1, np.linspace(1, 1, 44100 * 1))
 
-# time.sleep(0.90)
-# S.oscillators.remove(a)
 
-time.sleep(3)
-# stream.write((0.5 * a.sample(0, 20)).tobytes())
+time.sleep(1)
 S.kill()
 output_io.terminate()
 
