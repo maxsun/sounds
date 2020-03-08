@@ -138,7 +138,6 @@ S.oscillators.add(b)
 time.sleep(1)
 # S.attacks[b] = (1, np.linspace(1, 1, 44100 * 1))
 
-
 time.sleep(1)
 S.kill()
 output_io.terminate()
