@@ -142,5 +142,4 @@ time.sleep(1)
 time.sleep(1)
 S.kill()
 output_io.terminate()
-
 # Next, we want Context-Sensitive oscillators
