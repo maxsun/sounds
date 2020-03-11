@@ -1,10 +1,11 @@
 import mido
 import json
 import time
-import tone as T
+import synth as Synth
 import numpy as np
 import math
 import threading
+import pyaudio
 
 note_data = json.loads(open('./notes.json').read())
 
@@ -15,36 +16,8 @@ for note in note_data:
 
 mid = mido.MidiFile('./midi/DancingQueen.mid')
 
-tone = T.Test([])
-t = threading.Thread(target=tone.audio_loop)
-t.start()
-
-print('started tone loop(s)')
-
-tone.on = True
-
-# for note in notesdata:
-#     tone.frequency = notesdata[note]['frequency']
-#     time.sleep(duration)
-atk = 0.15
-dcy = 0.15
-d = 2
-
-start_time = time.time()
-t
-for i in np.linspace(440, 600, math.ceil(5 / (atk + dcy))):
-    tone.frequencies = { i }
-    tone.attack(atk)
-    # tone.volume = 0.5
-    # time.sleep(duration)
-    tone.decay(dcy)
-
-tone.on = False
-tone.frequencies = set()
-print('Done')
-print(time.time() - start_time)
-time.sleep(0.1)
-
+output_io = pyaudio.PyAudio()
+S = Synth.Synth(output_io)
 
 
 for i, msg in enumerate(mid.play()):
@@ -60,19 +33,21 @@ for i, msg in enumerate(mid.play()):
         freq = note_data[midi_to_note[midnote]]['frequency']
         
         if msg.type == 'note_on':
+            S.play(freq)
             # P.on(midi_to_note[midnote])
-            tone.frequencies.add(freq)
-            tone.volume = 0.5
-            tone.on = True
-            tone.attack(duration)
+            # tone.frequencies.add(freq)
+            # tone.volume = 0.5
+            # tone.on = True
+            # tone.attack(duration)
         elif msg.type == 'note_off':
             # P.off(midi_to_note[midnote])
-            if freq in tone.frequencies:
-                tone.frequencies.remove(freq)
+            S.stop(freq)
+            # if freq in tone.frequencies:
+            #     tone.frequencies.remove(freq)
                 # tone.decay(0.2)
 
     except AttributeError as e:
         print(e, msg)
 
-tone.on = False
+# tone.on = False
 
